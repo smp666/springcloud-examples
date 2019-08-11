@@ -1,0 +1,63 @@
+server:
+  port: 8888
+hystrix.command.fallbackcmd.execution.isolation.thread.timeoutInMilliseconds: 1000
+spring:
+  application:
+    name: spring-cloud-gateway-eureka
+#  redis:
+#    host: 192.168.160.10
+#    password:
+#    port: 6379
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: hystrix_route
+          uri: lb://spring-cloud-producer
+          predicates:
+            - Path=/add/**
+          filters:
+            - name: Hystrix
+              args:
+                name: fallback
+                fallbackUri: forward:/fallback
+#        - id: requestratelimiter_route
+#          uri: lb://spring-cloud-producer
+#          filters:
+#            - name: RequestRateLimiter
+#              args:
+#                redis-rate-limiter.replenishRate: 1
+#                redis-rate-limiter.burstCapacity: 1
+#                key-resolver: "#{@ipKeyResolver}"
+#            - AddRequestParameter=foo, bar
+#          predicates:
+#            - Method=GET
+#        - id: nameRoot
+#          uri: lb://spring-cloud-producer
+#          predicates:
+#            - Path=/name/**
+#          filters:
+#            - StripPrefix=2
+#        - id: prefixpath_route
+#          uri: lb://spring-cloud-producer
+#          predicates:
+#            - Path=/add
+#          filters:
+#          - PrefixPath=/mypath
+#          - AddRequestParameter=foo, bar
+#        - id: add_request_parameter_route
+#          uri: lb://spring-cloud-producer
+#          filters:
+#            - AddRequestParameter=foo, bar
+#          predicates:
+#              - Method=GET
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8000/eureka/
+logging:
+  level:
+    org.springframework.cloud.gateway: debug
